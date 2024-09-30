@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-w-subscribe-at",
   "description": "WillBot: subscription rule: at",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [

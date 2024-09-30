@@ -18,19 +18,6 @@ export interface Config {}
 
 export const Config: Schema<Config> = Schema.object({})
 
-const getMemberName = async (session: Session, uid: string) => {
-    const member = await session.bot.getGuildMember(session.guildId, uid.split(':')[1])
-    return member.nick || member.user.nick || member.user.name || uid
-}
-
-const escape = (content: string) => h
-    .parse(content)
-    .map(el => {
-        if (el.type === 'at') return '@'
-        return el.toString()
-    })
-    .join('')
-
 export function apply(ctx: Context) {
     const { dispose } = ctx.subscribe.rule('at', {
         filter: (session, config, subscriber) => {
@@ -45,7 +32,10 @@ export function apply(ctx: Context) {
                 h.parse(session.content).some(el => el.type === 'at' && el.attrs.id === userId)
             )
         },
-        render: async (session, msg) => `${escape(msg.content)} <- ${await getMemberName(session, msg.sender)}`,
+        render: async (session, msg) => {
+            session.getMemberName ??= await ctx.subscribe.utils.getMemberNameGetter(session)
+            return `${await ctx.subscribe.utils.escapeAt(session, msg)} <- ${session.getMemberName(msg.sender)}`
+        },
         schema: z.object({
             level: z.union([ z.const('never'), z.const('always'), z.const('selected') ]).required(),
             guilds: z.array(z.string()).default([])
